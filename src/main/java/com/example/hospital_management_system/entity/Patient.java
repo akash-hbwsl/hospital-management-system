@@ -1,15 +1,29 @@
 package com.example.hospital_management_system.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.example.hospital_management_system.entity.type.BloodGroupType;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @ToString
+@Getter
+@Setter
+@Table(
+        uniqueConstraints = {
+//                @UniqueConstraint(name = "unique_patient_name", columnNames = {"email"}),
+                @UniqueConstraint(name="unique_patient_name_birthdate", columnNames = {"name", "birthDate"})
+        },
+        indexes = {
+                @Index(name="idx_patient_birth_date", columnList = "birthDate")
+        }
+)
 public class Patient {
 
     @Id
@@ -21,7 +35,22 @@ public class Patient {
     @ToString.Exclude
     private LocalDate birthDate;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String gender;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private BloodGroupType bloodGroup;
+
+    @OneToOne()
+    @JoinColumn(name = "patient_insurance_id")
+    private Insurance insurance;
+
+    @OneToMany(mappedBy="patient")
+    private List<Appointment> appointments;
 }
